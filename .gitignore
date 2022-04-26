@@ -30,3 +30,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# googlekey.json
+googlekey.json*
+
+# cert
+cert.crt
+cert.key
