@@ -158,7 +158,41 @@ function AppBarAdmin(props) {
   };
 
  
-  
+  async function logout(){
+    try{
+      const url = process.env.HTTP_URL + "/api/login/logout";
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'allow-cors-origin': '*',
+          'crossDomain': true,
+          'Authorization': 'Basic ' + btoa(`${process.env.ADMIN_AUTH}:${process.env.ADMIN_PASSWORD}`)
+        },
+      })
+      // get response
+      const data_response = await response.json()
+      console.log(data_response, "ini data response")
+      // console.log(data, "ini data dari cek dokter")
+      if (response.status === 200) {
+        // create toast
+        Router.push('/')
+        return true
+      } else if (response.status === 400) {
+        Router.push('/')
+        return false
+      } else {
+        // create toast
+        Router.push('/')
+        return false
+      }
+      
+    }catch (err){
+      Router.push('/')
+      console.log(err)
+    }
+  }
+
 
   const renderMenu = (
     <Menu
@@ -177,7 +211,12 @@ function AppBarAdmin(props) {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={
+        () => {
+          logout()
+          handleMenuClose()
+        }
+      }>Logout</MenuItem>
     </Menu>
   );
 
@@ -188,8 +227,8 @@ function AppBarAdmin(props) {
 
 
   return (
-    <div>
-      
+    <>
+        
         <AppBar position="fixed" open={open} >
           <Toolbar>
             <IconButton
@@ -296,7 +335,7 @@ function AppBarAdmin(props) {
         
           
       </Drawer>
-    </div>
+    </>
   )
 }
 

@@ -46,10 +46,12 @@ app.prepare().then(() => {
   // import routes
   const login_router = require('./routes/login_router');
   const admin_router = require('./routes/admin_router');
+  const dokter_router = require('./routes/dokter_router');
 
   // use routes
   server.use('/api/login', login_router);
   server.use('/api/admin', admin_router);
+  server.use('/api/dokter', dokter_router);
 
   
 

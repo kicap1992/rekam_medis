@@ -325,6 +325,14 @@ function TindakanPage(props) {
 export const getServerSideProps = withIronSessionSsr(
   async function getServerSideProps({ req }) {
     const user = req.session.user;
+    if (!user) {
+      return {
+        redirect: {
+          destination: '/?error=true',
+          permanent: false,
+        }
+      };
+    }
     console.log(user, "sini di server side props");
     // console.log(req.query)
 

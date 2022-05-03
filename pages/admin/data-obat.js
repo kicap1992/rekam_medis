@@ -74,13 +74,6 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 
-
-
-
-
-
-
-
 const Transition = forwardRef(function Transition(props, ref) { // for modal history
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -932,6 +925,14 @@ export const getServerSideProps = withIronSessionSsr(
     const user = req.session.user;
     console.log(user, "sini di server side props");
     // console.log(req.query)
+    if (!user) {
+      return {
+        redirect: {
+          destination: '/?error=true',
+          permanent: false,
+        }
+      };
+    }
 
     let cek_user = await all_function.cek_user(user.username, user.password, user.role)
     console.log(cek_user, "cek user")

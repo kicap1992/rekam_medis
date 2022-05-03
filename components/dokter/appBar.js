@@ -1,5 +1,5 @@
 import * as React from 'react';
-// import { styled, useTheme } from '@mui/material/styles';
+import Router from 'next/router';
 import { styled, useTheme, alpha } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -19,12 +19,30 @@ import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
+import MedicationIcon from '@mui/icons-material/Medication';
 
 // coba
 import Box from '@mui/material/Box';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+
+const listmenu = [
+  {
+    name: 'Home',
+    name2: 'Halaman Utama',
+    icon: <HomeIcon />,
+    router: '/dokter',
+  },
+  {
+    name: 'Rekam Medis',
+    name2: 'Halaman Rekam Medis',
+    icon: <MedicationIcon />,
+    router: '/dokter/rekam-medis',
+  },
+
+]
+
 
 
 
@@ -96,7 +114,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-function AppBarDokter() {
+function AppBarDokter(props) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
@@ -119,7 +137,7 @@ function AppBarDokter() {
     setAnchorEl(null);
   };
 
- 
+
 
   const renderMenu = (
     <Menu
@@ -138,120 +156,164 @@ function AppBarDokter() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem
+        onClick={
+          () => {
+            logout()
+            handleMenuClose()
+          }
+        }
+      >Logout</MenuItem>
     </Menu>
   );
 
-  
+  function handleMenuRoute(menu) {
+    // console.log(menu + " sini menunya di appbar")
+    Router.push(menu)
+  }
 
+  async function logout() {
+    try {
+      const url = process.env.HTTP_URL + "/api/login/logout";
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'allow-cors-origin': '*',
+          'crossDomain': true,
+          'Authorization': 'Basic ' + btoa(`${process.env.ADMIN_AUTH}:${process.env.ADMIN_PASSWORD}`)
+        },
+      })
+      // get response
+      const data_response = await response.json()
+      console.log(data_response, "ini data response")
+      // console.log(data, "ini data dari cek dokter")
+      if (response.status === 200) {
+        // create toast
+        Router.push('/')
+        return true
+      } else if (response.status === 400) {
+        Router.push('/')
+        return false
+      } else {
+        // create toast
+        Router.push('/')
+        return false
+      }
+
+    } catch (err) {
+      Router.push('/')
+      console.log(err)
+    }
+  }
 
   return (
     <div>
-      
-        <AppBar position="fixed" open={open}>
-          <Toolbar>
+
+      <AppBar position="fixed" open={open} >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            // onClick={handleDrawerOpen}
+            onClick={(!props.backdrop && !props.sweetalertload) ? handleDrawerOpen : null}
+            edge="start"
+            sx={{
+              marginRight: 5,
+              ...(open && { display: 'none' }),
+              cursor: (!props.backdrop && !props.sweetalertload) ? 'pointer' : 'default'
+            }}
+
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            {/* check the listmenu name if same as props.menu then load the listmenu.name2  */}
+            {
+              listmenu.map((listmenu, index) => {
+                if (listmenu.name === props.menu) {
+                  return listmenu.name2
+                }
+              })
+            }
+          </Typography>
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: "flex", md: 'flex' } }}>
+
             <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              onClick={(!props.backdrop && !props.sweetalertload) ? handleProfileMenuOpen : null}
               color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
               sx={{
-                marginRight: 5,
-                ...(open && { display: 'none' }),
+                cursor: (!props.backdrop && !props.sweetalertload) ? 'pointer' : 'default'
               }}
             >
-              <MenuIcon />
+              <AccountCircle />
             </IconButton>
-            <Typography variant="h6" noWrap component="div">
-              Mini variant drawer
-            </Typography>
-            
-            <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ display: { xs: "flex", md: 'flex' } }}>
-              
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-            </Box>
-          </Toolbar>
-        </AppBar>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-        {renderMenu}
-     
+      {renderMenu}
+
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <Typography variant="h6" noWrap>Rekam Medis</Typography>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>        
+          </IconButton>
         </DrawerHeader>
         <Divider />
         <List>
-          <ListItemButton
-            key={"text"}
-            onClick={null}
-            // disableElevation
-            disableRipple
-            sx={{
-              minHeight: 48,
-              justifyContent: open ? 'initial' : 'center',
-              px: 2.5,
-              backgroundColor: theme.palette.primary.main,
-              color: "white",
-              '&:hover': {
-                background: theme.palette.primary.main,
-              },
-              cursor: 'default',
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                // color: "white",
-                minWidth: 0,
-                mr: open ? 3 : 'auto',
-                justifyContent: 'center',
-              }}
-            >
-              <HomeIcon sx={{
-                color: "white",
-              }} />
-            </ListItemIcon>
-            <ListItemText primary="Menu Utama" sx={{ opacity: open ? 1 : 0 }} />
-          </ListItemButton>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItemButton
-              key={text}
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
+          {
+            listmenu.map((menu, index) => (
+              <ListItemButton
+                key={index}
+                // onClick={handleMenuRoute("hehe")}
+                // onClick={() => props.handleMenuRoute(menu.router)}
+                onClick={(!props.backdrop && !props.sweetalertload && props.menu) ? () => handleMenuRoute(menu.router) : null}
+                // disableElevation
+                // disableRipple
                 sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                  backgroundColor: (props.menu == menu.name) ? theme.palette.primary.main : null, // ini
+                  color: (props.menu == menu.name) ? "white" : "grey", // ini
+                  '&:hover': {
+                    background: (props.menu == menu.name) ? theme.palette.primary.main : null, // ini
+                  },
+                  cursor: (props.backdrop || props.sweetalertload) ? 'default' : "pointer",
+                  // cursor:  "alias",
                 }}
               >
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          ))}
-        
+                <ListItemIcon
+                  sx={{
+                    color: (props.menu == menu.name) ? "white" : "grey", // ini
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {
+                    menu.icon
+                  }
+                </ListItemIcon>
+                <ListItemText primary={menu.name2} sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            ))
+          }
+
+
         </List>
 
-        
-          
+
+
       </Drawer>
     </div>
   )

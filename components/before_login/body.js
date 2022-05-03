@@ -26,7 +26,7 @@ import TableRow from '@mui/material/TableRow';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { ToastContainer ,toast , Zoom , Bounce } from 'react-toastify'
+import { ToastContainer, toast, Zoom, Bounce } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 
 // sweet alert
@@ -65,16 +65,17 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 // });
 
 export default function GridIndex(props) {
-  const [cekError, setCekError] = useState(props.errornya);
+  // console.log(props)
+  const [errornya , setError] = useState(props.errornya)
 
-  if(cekError == true){
-     MySwal.fire({
+  if (errornya == true) {
+    MySwal.fire({
       title: `<strong>Error</strong>`,
       html: "Anda Harus Login Terlebih Dahulu",
       icon: 'error',
       showConfirmButton: false,
     })
-    setCekError(false)
+    setError(false)
   }
   const usernameInputRef = useRef();
   const passwordInputRef = useRef();
@@ -94,44 +95,49 @@ export default function GridIndex(props) {
     const password = passwordInputRef.current.value;
     setBackdrop(true);
     // try {
-      let http_server = process.env.HTTP_URL+"/api/login?username="+username+"&password="+md5(password)+"&role="+role;
-      // console.log(http_server);
-      const response = await fetch(http_server, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'allow-cors-origin': '*',
-          'crossDomain': true,
-        }
-      });
-      const data = await response.json();
-      // console.log(response);
-      if(response.status == 200){
-        console.log(data);
-        toast.success("Login Success")
-        // pause 2 seconds
+    let http_server = process.env.HTTP_URL + "/api/login?username=" + username + "&password=" + md5(password) + "&role=" + role;
+    // console.log(http_server);
+    const response = await fetch(http_server, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'allow-cors-origin': '*',
+        'crossDomain': true,
+      }
+    });
+    const data = await response.json();
+    // console.log(response);
+    if (response.status == 200) {
+      console.log(data);
+      toast.success("Login Success")
+      // pause 2 seconds
 
-        setTimeout( async function(){
-          // put data to local storage
-          
-          await localStorage.setItem('user_data', JSON.stringify(data));
-          // localStorage.removeItem('user_data');
-          document.cookie = data;
-          
+      setTimeout(async function () {
+        // // put data to local storage
 
-          
-          
+        // await localStorage.setItem('user_data', JSON.stringify(data));
+        // // localStorage.removeItem('user_data');
+        // document.cookie = data;
+        if (role == 'Admin') {
           // redirect to dashboard
           await router.replace('/admin');
-        }, 2000);
-      }else if(response.status == 400){
-        // console.log(data);
-        toast.warning(data.message);
-        // focus on username input
-        usernameInputRef.current.focus();
-      }else{
-        toast.error("Server Error");
-      }
+        }else if (role == 'Dokter') {
+          // redirect to dashboard
+          await router.replace('/dokter');
+        }
+
+
+
+
+      }, 2000);
+    } else if (response.status == 400) {
+      // console.log(data);
+      toast.warning(data.message);
+      // focus on username input
+      usernameInputRef.current.focus();
+    } else {
+      toast.error("Server Error");
+    }
     // } catch (error) {
     //   console.log(error)
     // }
@@ -142,7 +148,7 @@ export default function GridIndex(props) {
   // const classes = useStyles();
   return (
     <div >
-      <ToastContainer  position={toast.POSITION.TOP_CENTER} transition={Zoom} autoClose={2000}  Bounce={Bounce} theme="colored" />
+      <ToastContainer position={toast.POSITION.TOP_CENTER} transition={Zoom} autoClose={2000} Bounce={Bounce} theme="colored" />
       <Backdrop open={backdrop} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
       <div style={{ maxWidth: "100%", padding: 30 }}>
         <div sx={{ flexGrow: 1, p: 3 }}>
@@ -158,44 +164,50 @@ export default function GridIndex(props) {
                   paddingBottom: "10px",
                   backgroundColor: "silver",
                 }}>Jadwal Praktek Hari :</Typography>
-                <TableContainer component={Box} sx={{
-                  padding: "15px",
+                <Box sx={{ padding: "5px" }}></Box>
+                <TableContainer sx={{
+                  maxHeight: 500,
+                  minWidth: 500,
+                  // padding: "15px",
+                  paddingLeft: "15px",
+                  paddingRight: "15px",
+                  paddingBottom: "15px",
                 }}>
-                  <Table  aria-label="simple table" sx={{
-                    minWidth: 650,
+                  <Table stickyHeader aria-label="sticky table" sx={{
                     boxShadow: 3,
                     "& .MuiTableCell-root": {
                       borderLeft: "1px solid rgba(224, 224, 224, 1)"
                     }
                   }}>
                     <TableHead>
-                      <TableRow>
-                        <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-                        <StyledTableCell align="right">Calories</StyledTableCell>
-
+                      <TableRow hover>
+                        <StyledTableCell>Nama</StyledTableCell>
+                        <StyledTableCell>Spesialis</StyledTableCell>
+                        <StyledTableCell>Jam Mulai</StyledTableCell>
+                        <StyledTableCell>Jam Selesai</StyledTableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
-                        <TableRow
-                          key={row.name}
-
-                        >
-                          <TableCell component="th" scope="row">
-                            {row.name}
-                          </TableCell>
-                          <TableCell align="right">{row.calories}</TableCell>
-
-                        </TableRow>
-                      ))}
+                      {
+                        props.jadwal_dokter.map((jadwal, index) => {
+                          return (
+                            <TableRow key={index}>
+                              <TableCell>{jadwal.tb_dokter.nama}</TableCell>
+                              <TableCell>{jadwal.tb_dokter.spesialis}</TableCell>
+                              <TableCell>{jadwal.jam_mulai}</TableCell>
+                              <TableCell>{jadwal.jam_selesai}</TableCell>
+                            </TableRow>
+                          )
+                        })
+                      }
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <Box sx={{ padding: "5px" }}></Box>
+                {/* <Box sx={{ padding: "5px" }}></Box>
                 <Box textAlign="center">
                   <Button variant="contained">Cetak</Button>
                 </Box>
-                <Box sx={{ padding: "10px" }}></Box>
+                <Box sx={{ padding: "10px" }}></Box> */}
               </Card>
             </Grid>
             <Grid item xs={12} md={4}>

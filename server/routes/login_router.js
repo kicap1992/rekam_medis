@@ -5,6 +5,7 @@ const db = require('../database/index.js')
 const tb_admin = db.admin
 const tb_dokter = db.dokter
 const tb_login = db.login
+const tb_jadwal_dokter = db.jadwal_dokter
 const Op = db.Sequelize.Op
 
 var ironSession = require("iron-session/express").ironSession;
@@ -116,4 +117,39 @@ router.get('/', session, async (req, res) => {
   }
 })
 
+// create /logout get request
+router.get('/logout', session, async (req, res) => {
+  try {
+    // console.log(req.session.user);
+    req.session.destroy();
+    res.send({ status: true, message: "logout success" })
+  } catch (error) {
+    res.status(500).send({ status: false, message: error.message })
+  }
+})
+
+// create /jadwal_dokter get request
+router.get('/jadwal_dokter',  async (req, res) => {
+  console.log("sini untuk jadwal get")
+  try {
+    let today_date = new Date();
+    let days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    let hari_ini = days[today_date.getDay()];
+    let all_jadwal = await tb_jadwal_dokter.findAll({
+      where: {
+        hari: hari_ini
+      },
+      include: {
+        model: tb_dokter,
+        attributes: ['nama', 'spesialis']
+      }
+    })
+
+    res.status(200).send({ status: true, data: all_jadwal })
+
+  } catch (err) {
+    console.log(err)
+    res.status(500).send({ status: false, message: "internal server error" })
+  }
+})
 module.exports = router

@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false
     },
     tgl_lahir:{
-      type: Sequelize.DATE,
+      type: Sequelize.DATEONLY,
       allowNull: false
     },
     alamat:{

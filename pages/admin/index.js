@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -65,7 +65,7 @@ function AdminIndexPage() {
   //   }
   // }
   // cek_user()
-  
+
   return (
     <div>
       {/* <ThemeProvider theme={theme}>  */}
@@ -199,8 +199,42 @@ function AdminIndexPage() {
 export const getServerSideProps = withIronSessionSsr(
   async function getServerSideProps({ req }) {
     const user = req.session.user;
+    if (!user) {
+      return {
+        redirect: {
+          destination: '/?error=true',
+          permanent: false,
+        }
+      };
+    }
     console.log(user, "sini di server side props");
-    // console.log(req.query)
+    console.log(user.role , "ini rolenya")
+
+    if (user.role != "Admin") {
+      try {
+        console.log("jalankannya ini di admin")
+        const url = process.env.HTTP_URL + "/api/login/logout";
+        await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'allow-cors-origin': '*',
+            'crossDomain': true,
+            'Authorization': 'Basic ' + btoa(`${process.env.ADMIN_AUTH}:${process.env.ADMIN_PASSWORD}`)
+          },
+        })
+        
+      } catch (err) {
+
+      }
+
+      return {
+        redirect: {
+          destination: '/?error=true',
+          permanent: false,
+        }
+      };
+    }
 
     let cek_user = await all_function.cek_user(user.username, user.password, user.role)
     console.log(cek_user, "cek user")

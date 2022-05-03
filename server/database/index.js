@@ -3,13 +3,14 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
-  operatorsAliases: false,
+  operatorsAliases: 0,
   pool: {
     max: dbConfig.pool.max,
     min: dbConfig.pool.min,
     acquire: dbConfig.pool.acquire,
     idle: dbConfig.pool.idle
-  }
+  },
+  timezone: '+08:00'
 })
 const db = {}
 db.Sequelize = Sequelize
@@ -23,6 +24,7 @@ db.dokter = require('./model/dokter.model.js')(sequelize, Sequelize)
 db.pasien = require('./model/pasien.model.js')(sequelize, Sequelize)
 db.tindakan = require('./model/tindakan.model.js')(sequelize, Sequelize)
 db.rekam_medis = require('./model/rekam_medis.model.js')(sequelize, Sequelize)
+db.jadwal_dokter = require('./model/jadwal_dokter.model.js')(sequelize, Sequelize)
 
 // create one to one relations between admin and login
 db.admin.hasOne(db.login, {foreignKey: {name: 'id_admin', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
@@ -33,12 +35,16 @@ db.dokter.hasOne(db.login, {foreignKey: {name: 'id_dokter', allowNull: true}}, {
 db.login.belongsTo(db.dokter, {foreignKey: {name: 'id_dokter', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
 
 // create one to many relations between pasien and rekam_medis
-db.pasien.hasMany(db.rekam_medis, {foreignKey: {name: 'id_pasien', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
-db.rekam_medis.belongsTo(db.pasien, {foreignKey: {name: 'id_pasien', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+db.pasien.hasMany(db.rekam_medis, {foreignKey: {name: 'id_pasien', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+db.rekam_medis.belongsTo(db.pasien, {foreignKey: {name: 'id_pasien', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
 
 // create one to many relations between dokter and rekam_medis
-db.dokter.hasMany(db.rekam_medis, {foreignKey: {name: 'id_dokter', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
-db.rekam_medis.belongsTo(db.dokter, {foreignKey: {name: 'id_dokter', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+db.dokter.hasMany(db.rekam_medis, {foreignKey: {name: 'id_dokter', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+db.rekam_medis.belongsTo(db.dokter, {foreignKey: {name: 'id_dokter', allowNull: true}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+
+// create one to many relations between dokter and jadwal_dokter
+db.dokter.hasMany(db.jadwal_dokter, {foreignKey: {name: 'id_dokter', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
+db.jadwal_dokter.belongsTo(db.dokter, {foreignKey: {name: 'id_dokter', allowNull: false}}, {onDelete: 'CASCADE' , hooks: true , onUpdate: 'CASCADE'})
 
 
 module.exports = db

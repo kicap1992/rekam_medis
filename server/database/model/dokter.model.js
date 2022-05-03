@@ -22,8 +22,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
-    jam_kerja:{
-      type: Sequelize.TEXT('long'),
+    status : {
+      type: Sequelize.STRING,
+      allowNull: false
     }
   },{
     freezeTableName: true,

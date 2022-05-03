@@ -6,29 +6,38 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
-    tanggal_perikas:{
-      type: Sequelize.DATE,
+    tanggal_periksa:{
+      type: Sequelize.DATEONLY,
+      allowNull: false
+    },
+    jam_periksa:{
+      type: Sequelize.TIME,
       allowNull: false
     },
     diagnosa:{
       type: Sequelize.TEXT("tiny"),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     keluhan:{
       type: Sequelize.TEXT("tiny"),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     keterangan:{
       type: Sequelize.TEXT("tiny"),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     tindakan:{
       type: Sequelize.TEXT("tiny"),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     obat : {
       type: Sequelize.TEXT("tiny"),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     }
   },{
     freezeTableName: true,

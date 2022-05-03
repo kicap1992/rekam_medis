@@ -39,7 +39,7 @@ const ResponsiveAppBarIndex = () => {
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="No User">
-                <Avatar alt="Remy Sharp" src="https://kicap-karan.com/assets/img/me.jpg" />
+                <Avatar alt="Remy Sharp" src="/logo1.png"  />
             </Tooltip>
             
           </Box>
