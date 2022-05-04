@@ -105,6 +105,37 @@ router.delete('/tindakan', basicAuthMiddleware, async (req, res) => {
   }
 })
 
+// create /tindakan put request
+router.put('/tindakan', basicAuthMiddleware, async (req, res) => {
+  try{
+    const id = req.query.id
+    const tindakan = req.body.tindakan
+    if (!id) {
+      return res.status(400).send({ status: false, message: `id tidak boleh kosong` })
+    }
+
+    let cek_tindakan = await tb_tindakan.findOne({
+      where: {
+        id_tindakan: id
+      }
+    })
+
+    if (!cek_tindakan) {
+      return res.status(400).send({ status: false, message: `Tindakan dengan id ${id} tidak ditemukan` })
+    }
+
+    await cek_tindakan.update({
+      nama_tindakan: tindakan
+    })
+
+    res.status(200).send({ status: true, message: `Tindakan dengan id ${id} berhasil diubah` })
+
+  }catch(err){
+    console.log(err)
+    res.status(500).send({ status: false, message: "internal server error" })
+  }
+})
+
 // create /obat post request
 router.post('/obat', basicAuthMiddleware, async (req, res) => {
   console.log("sini untuk obat post")
@@ -605,6 +636,34 @@ router.post('/jadwal_dokter', basicAuthMiddleware, async (req, res) => {
     }
     await tb_jadwal_dokter.create(data_jadwal)
     res.status(200).send({ status: true, message: `Jadwal dokter dengan id ${data_jadwal.id_dokter} berhasil ditambahkan` })
+  }catch(err){
+    console.log(err)
+    res.status(500).send({ status: false, message: "internal server error" })
+  }
+})
+
+// create /jadwal_dokter put request
+router.put('/jadwal_dokter', basicAuthMiddleware, async (req, res) => {
+  try{
+    const data_jadwal = req.body
+    if( !data_jadwal.id_dokter || !data_jadwal.hari || !data_jadwal.jam_mulai || !data_jadwal.jam_selesai){
+      return res.status(400).send({ status: false, message: `Data tidak lengkap` })
+    }
+    let cek_dokter = await tb_dokter.findOne({
+      where: {
+        nik: data_jadwal.id_dokter
+      }
+    })
+    if(!cek_dokter){
+      return res.status(400).send({ status: false, message: `Dokter dengan id ${data_jadwal.id_dokter} tidak ditemukan` })
+    }
+    await tb_jadwal_dokter.update(data_jadwal, {
+      where: {
+        id_dokter: data_jadwal.id_dokter,
+        hari: data_jadwal.hari
+      }
+    })
+    res.status(200).send({ status: true, message: `Jadwal dokter dengan NIK ${data_jadwal.id_dokter} berhasil diubah` })
   }catch(err){
     console.log(err)
     res.status(500).send({ status: false, message: "internal server error" })

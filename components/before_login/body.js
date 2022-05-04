@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState ,useEffect } from "react";
 import { useRouter } from "next/router";
 
 
@@ -55,18 +55,15 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   }
 }));
 
-// const useStyles = makeStyles({
-//   table: {
-//     minWidth: 650,
-//     "& .MuiTableCell-root": {
-//       borderLeft: "1px solid rgba(224, 224, 224, 1)"
-//     }
-//   }
-// });
 
 export default function GridIndex(props) {
-  // console.log(props)
-  const [errornya , setError] = useState(props.errornya)
+  console.log(props)
+  const [errornya, setError] = useState(props.errornya)
+  const [jadwal_dokter, setJadwalDokter] = useState(false);
+
+  useEffect(() => {
+    setJadwalDokter(props.jadwal_dokter)
+  },[props.jadwal_dokter])
 
   if (errornya == true) {
     MySwal.fire({
@@ -121,7 +118,7 @@ export default function GridIndex(props) {
         if (role == 'Admin') {
           // redirect to dashboard
           await router.replace('/admin');
-        }else if (role == 'Dokter') {
+        } else if (role == 'Dokter') {
           // redirect to dashboard
           await router.replace('/dokter');
         }
@@ -189,16 +186,32 @@ export default function GridIndex(props) {
                     </TableHead>
                     <TableBody>
                       {
-                        props.jadwal_dokter.map((jadwal, index) => {
-                          return (
-                            <TableRow key={index}>
-                              <TableCell>{jadwal.tb_dokter.nama}</TableCell>
-                              <TableCell>{jadwal.tb_dokter.spesialis}</TableCell>
-                              <TableCell>{jadwal.jam_mulai}</TableCell>
-                              <TableCell>{jadwal.jam_selesai}</TableCell>
+                        // (jadwal_dokter == false)
+                        //   ?
+                        //   <TableRow>
+                        //     <TableCell colSpan={4} align="center">
+                        //       Masalah Dengan Server
+                        //     </TableCell>
+                        //   </TableRow>
+                        //   :
+                          (jadwal_dokter.length > 0)
+                            ?
+                            jadwal_dokter.map((jadwal, index) => {
+                              return (
+                                <TableRow key={index}>
+                                  <TableCell>{jadwal.tb_dokter.nama}</TableCell>
+                                  <TableCell>{jadwal.tb_dokter.spesialis}</TableCell>
+                                  <TableCell>{jadwal.jam_mulai}</TableCell>
+                                  <TableCell>{jadwal.jam_selesai}</TableCell>
+                                </TableRow>
+                              )
+                            })
+                            :
+                            <TableRow>
+                              <TableCell colSpan={4} align="center">
+                                Tidak Ada Jadwal Praktek
+                              </TableCell>
                             </TableRow>
-                          )
-                        })
                       }
                     </TableBody>
                   </Table>

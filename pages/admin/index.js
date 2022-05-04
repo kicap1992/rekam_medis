@@ -18,6 +18,11 @@ import AppBarAdmin from '../../components/admin/appBar';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
+// sweet alert
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+const MySwal = withReactContent(Swal)
+
 // this for check session
 let all_function = require('../../function/all_function.js')
 import { withIronSessionSsr } from "iron-session/next";
@@ -55,7 +60,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 function AdminIndexPage() {
   // console.log(localStorage.getItem("user_data"))
-  const [backdrop, setBackdrop] = useState(false);
+
+  const [backdrop, setBackdrop] = useState(false); //this is for backdrop
+  const [sweetAlertLoading, setSweetAlertLoading] = useState(false); //this is for sweet alert loading
 
   // async function cek_user(){
   //   setBackdrop(true);
@@ -67,12 +74,18 @@ function AdminIndexPage() {
   // cek_user()
 
   return (
-    <div>
+    <>
       {/* <ThemeProvider theme={theme}>  */}
       <Backdrop open={backdrop} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBarAdmin menu="Home" />
+        <AppBarAdmin menu="Home" backdrop={backdrop} sweetalertload={sweetAlertLoading} 
+          toRoute={
+            () => {
+              setBackdrop(true);
+            }
+          }
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <Grid container spacing={2}>
@@ -192,7 +205,7 @@ function AdminIndexPage() {
         </Box>
       </Box>
       {/* </ThemeProvider> */}
-    </div>
+    </>
   );
 }
 

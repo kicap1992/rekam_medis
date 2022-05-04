@@ -103,6 +103,7 @@ function TabelJadwalDokter(props) {
   const jamSelesaiInputRef = useRef();
   const [jamMulai, setJamMulai] = useState(null);
   const [jamSelesai, setJamSelesai] = useState(null);
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     setHari(props.hari_nya)
@@ -141,20 +142,22 @@ function TabelJadwalDokter(props) {
 
       await MySwal.fire({
         title: 'Yakin ?',
-        text: `Jadwal Pada Hari ${hari} akan ditambahkan ke dokter dengan nik ${nik}`,
+        text: (status == 'tambah') ? `Jadwal Pada Hari ${hari} akan ditambahkan ke dokter dengan nik ${nik}` : `Jadwal Pada Hari ${hari} akan diubah ke dokter dengan nik ${nik}`,
         icon: 'info',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, tambahkan!'
+        confirmButtonText: (status == 'tambah') ? 'Ya, tambahkan!' : 'Ya, ubah!',
       }).then(async (result) => {
         if (result.value) {
           props.backdropnya(true);
 
+          
+
           try {
             const url = process.env.HTTP_URL + "/api/admin/jadwal_dokter";
             const response = await fetch(url, {
-              method: 'POST',
+              method: (status == 'tambah') ? 'POST' : 'PUT',
               headers: {
                 'Content-Type': 'application/json',
                 'allow-cors-origin': '*',
@@ -210,6 +213,7 @@ function TabelJadwalDokter(props) {
             () => {
               setHari(props.harinya[i])
               setOpenDialog(true)
+              setStatus("tambah")
             }
           }>
             <ModeEditIcon />
@@ -226,7 +230,21 @@ function TabelJadwalDokter(props) {
           <TableCell>{props.dataJadwal[j].jam_mulai}</TableCell>
           <TableCell>{props.dataJadwal[j].jam_selesai}</TableCell>
           <TableCell>
-            <IconButton color="success">
+            <IconButton color="success" 
+              onClick={
+                () => {
+                  setHari(props.harinya[i])
+                  let today = new Date()
+                  let jam_mulai_new = new Date(today.getFullYear(), today.getMonth(), today.getDate(), props.dataJadwal[j].jam_mulai.split(":")[0], props.dataJadwal[j].jam_mulai.split(":")[1])
+                  let jam_selesai_new = new Date(today.getFullYear(), today.getMonth(), today.getDate(), props.dataJadwal[j].jam_selesai.split(":")[0], props.dataJadwal[j].jam_selesai.split(":")[1])
+                  
+                  setJamMulai(jam_mulai_new)
+                  setJamSelesai(jam_selesai_new)
+                  setOpenDialog(true)
+                  setStatus("edit")
+                }
+              }
+            >
               <ModeEditIcon />
             </IconButton>
             <IconButton color="error">
@@ -272,6 +290,7 @@ function TabelJadwalDokter(props) {
                 label="Jam Mulai"
                 value={jamMulai}
                 onChange={(newValue) => {
+                  console.log(newValue, "ini new value")
                   setJamMulai(newValue);
                 }}
                 renderInput={(params) => <TextField {...params} />}
@@ -296,7 +315,9 @@ function TabelJadwalDokter(props) {
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" type="submit" color="primary">
-            Tambah
+            {
+              status == "tambah" ? "Tambah" : "Edit"
+            }
           </Button>
 
         </DialogActions>

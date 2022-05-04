@@ -44,6 +44,52 @@ import IconButton from '@mui/material/IconButton';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
+// for dialog
+import PropTypes from 'prop-types';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import CloseIcon from '@mui/icons-material/Close';
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
+
+const BootstrapDialogTitle = (props) => {
+  const { children, onClose, ...other } = props;
+
+  return (
+    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+      {children}
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </DialogTitle>
+  );
+};
+
+BootstrapDialogTitle.propTypes = {
+  children: PropTypes.node,
+  onClose: PropTypes.func.isRequired,
+};
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -116,7 +162,7 @@ function TindakanPage(props) {
   // delete tindakan
   async function delete_tindakan(id) {
     // console.log(id, "ini id yang akan di delete")
-    try{
+    try {
       const url = process.env.HTTP_URL + "/api/admin/tindakan?id=" + id
       console.log(url, "ini url yang akan di delete")
       // create fetch post request
@@ -128,7 +174,7 @@ function TindakanPage(props) {
           'crossDomain': true,
           'Authorization': 'Basic ' + btoa(`${process.env.ADMIN_AUTH}:${process.env.ADMIN_PASSWORD}`)
         },
-        
+
       })
       // get response
       const data = await response.json()
@@ -139,12 +185,12 @@ function TindakanPage(props) {
         toast.success(data.message)
         Router.replace(Router.asPath)
         // return true
-      }else{
+      } else {
         // create toast
         toast.error(data.message)
         // return false
       }
-    }catch(err){
+    } catch (err) {
       console.log(err)
       toast.error("Terjadi kesalahan pada server")
     }
@@ -175,7 +221,7 @@ function TindakanPage(props) {
         if (!response) {
           // focus to input
           tindakanInputRef.current.focus();
-        }else{
+        } else {
           // clear input
           tindakanInputRef.current.value = "";
           Router.replace(Router.asPath);
@@ -188,7 +234,7 @@ function TindakanPage(props) {
   }
 
   // before delete tindakan
-  async function deleteTindakan(id,nama){
+  async function deleteTindakan(id, nama) {
     console.log(id, "ini id yang akan di hapus")
     await setSweetAlertLoading(true);
     await MySwal.fire({
@@ -212,13 +258,132 @@ function TindakanPage(props) {
     await setSweetAlertLoading(false);
   }
 
+  const [openDialog, setOpenDialog] = useState(false);
+  const [idEdit, setIdEdit] = useState(null);
+  const tindakanEditInputRef = useRef();
+  const [tindakanEdit, setTindakanEdit] = useState(null);
+  const [periksaTindakanEdit, setPeriksaTindakanEdit] = useState(null);
+
+  const editTindakan = async (e) => {
+    e.preventDefault();
+    if(tindakanEdit == periksaTindakanEdit){
+      toast.error("Tiada Perubahan")
+      // focus input
+      tindakanEditInputRef.current.focus();
+      return
+    }else{
+      setSweetAlertLoading(true);
+      setOpenDialog(false);
+      await MySwal.fire({
+        title: 'Yakin ?',
+        text: `Anda akan mengubah detail Tindakan ${periksaTindakanEdit} ke ${tindakanEdit}`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Ubah!',
+        cancelButtonText: 'Batal',
+      }).then(async (result) => {
+        if (result.value) {
+          setBackdrop(true);
+          // await 4 sec
+          try {
+            const url = process.env.HTTP_URL + "/api/admin/tindakan?id=" + idEdit
+            // create fetch post request
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'allow-cors-origin': '*',
+                'crossDomain': true,
+                'Authorization': 'Basic ' + btoa(`${process.env.ADMIN_AUTH}:${process.env.ADMIN_PASSWORD}`)
+              },
+              body: JSON.stringify({
+                tindakan: tindakanEdit
+              })
+            })
+
+            // get response
+            const data = await response.json()
+            if( response.status === 200 ){
+              // create toast
+              toast.success(data.message)
+              Router.replace(Router.asPath)
+            }else{
+              // create toast
+              toast.error(data.message)
+            }
+
+          } catch (error) {
+            toast.error("Terjadi kesalahan pada server")
+            console.log(error)
+          }
+
+        } else {
+          setOpenDialog(true);
+        }
+      })
+
+      setBackdrop(false);
+      setSweetAlertLoading(false);
+    }
+  }
+
   return (
-    <div>
+    <>
       <ToastContainer position={toast.POSITION.TOP_CENTER} transition={Zoom} autoClose={2000} Bounce={Bounce} theme="colored" />
       <Backdrop open={backdrop} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
+
+      <BootstrapDialog
+        aria-labelledby="customized-dialog-title"
+        open={openDialog}
+        component="form"
+        onSubmit={editTindakan}
+        fullWidth={true}
+      >
+        <BootstrapDialogTitle id="customized-dialog-title"
+          onClose={
+            () => {
+              setOpenDialog(false);
+            }
+          }
+        >
+          Edit Tindakan
+        </BootstrapDialogTitle>
+        <DialogContent dividers align="center">
+          <TextField
+            id="tindakanEditTextField"
+            value={tindakanEdit}
+            inputRef={tindakanEditInputRef}
+            label="Tindakan "
+            onChange={(e) => {
+              setTindakanEdit(e.target.value);
+            }}
+            placeholder="Masukkan Tindakan "
+            sx={{ width: "85%", boxShadow: 10 }}
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            variant="outlined"
+            color="primary"
+            type="submit"
+          >
+            Simpan Perubahan
+          </Button>
+        </DialogActions>
+      </BootstrapDialog>
+
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBarAdmin menu="Tindakan" backdrop={backdrop} sweetalertload={sweetAlertLoading} />
+        <AppBarAdmin menu="Tindakan" backdrop={backdrop} sweetalertload={sweetAlertLoading}
+          toRoute={
+            () => {
+              setBackdrop(true);
+            }
+          }
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <Grid container spacing={2}>
@@ -276,34 +441,50 @@ function TindakanPage(props) {
                         <StyledTableCell sx={{
                           width: "30%",
                         }}>Aksi</StyledTableCell>
-                        {/* <StyledTableCell align="right">Fat&nbsp;(g)</StyledTableCell>
-                        <StyledTableCell align="right">Carbs&nbsp;(g)</StyledTableCell>
-                        <StyledTableCell align="right">Protein&nbsp;(g)</StyledTableCell> */}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {props.tindakan.map((row) => (
-                        <TableRow
-                          key={row.id_tindakan}
-                        // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {row.nama_tindakan}
-                          </TableCell>
-                          <TableCell>
-                            <IconButton  size="small"  color="primary"> 
-                              <ModeEditIcon />
-                            </IconButton>
-                            <IconButton  size="small" color="error" onClick={
-                              () => {
-                                deleteTindakan(row.id_tindakan, row.nama_tindakan)
-                              }
-                            } > 
-                              <DeleteForeverIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {
+                        (props.tindakan.length > 0)
+                          ?
+                          props.tindakan.map((row) => (
+                            <TableRow
+                              key={row.id_tindakan}
+                            // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                              <TableCell component="th" scope="row">
+                                {row.nama_tindakan}
+                              </TableCell>
+                              <TableCell>
+                                <IconButton size="small" color="primary"
+                                  onClick={
+                                    () => {
+                                      setOpenDialog(true);
+                                      setIdEdit(row.id_tindakan);
+                                      setTindakanEdit(row.nama_tindakan);
+                                      setPeriksaTindakanEdit(row.nama_tindakan);
+                                    }
+                                  }
+                                >
+                                  <ModeEditIcon />
+                                </IconButton>
+                                <IconButton size="small" color="error" onClick={
+                                  () => {
+                                    deleteTindakan(row.id_tindakan, row.nama_tindakan)
+                                  }
+                                } >
+                                  <DeleteForeverIcon />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                          :
+                          <TableRow>
+                            <TableCell colSpan={2}>
+                              Tiada Data
+                            </TableCell>
+                          </TableRow>
+                      }
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -318,7 +499,7 @@ function TindakanPage(props) {
           </Grid>
         </Box>
       </Box>
-    </div>
+    </>
   );
 }
 

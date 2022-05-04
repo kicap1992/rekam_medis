@@ -641,7 +641,13 @@ function DataPasienPage(props) {
 
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBarAdmin menu="Pasien" backdrop={backdrop} sweetalertload={sweetAlertLoading} />
+        <AppBarAdmin menu="Pasien" backdrop={backdrop} sweetalertload={sweetAlertLoading} 
+          toRoute={
+            () => {
+              setBackdrop(true);
+            }
+          }
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <Grid container spacing={4}>
@@ -1184,7 +1190,7 @@ function DataPasienPage(props) {
                             })
                             :
                             <TableRow>
-                              <TableCell colSpan={5} align="center">
+                              <TableCell colSpan={7} align="center">
                                 Tiada Jadwal Pasien
                               </TableCell>
                             </TableRow>

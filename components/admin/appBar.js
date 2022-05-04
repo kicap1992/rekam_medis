@@ -222,6 +222,7 @@ function AppBarAdmin(props) {
 
   function handleMenuRoute(menu){
     // console.log(menu + " sini menunya di appbar")
+    props.toRoute()
     Router.push(menu)
   }
 

@@ -379,7 +379,13 @@ function DataDokterPage(props) {
       <Backdrop open={backdrop} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBarAdmin menu="Dokter" backdrop={backdrop} sweetalertload={sweetAlertLoading} />
+        <AppBarAdmin menu="Dokter" backdrop={backdrop} sweetalertload={sweetAlertLoading} 
+          toRoute={
+            () => {
+              setBackdrop(true);
+            }
+          }
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }} >
           <DrawerHeader />
           <Grid container spacing={4}>

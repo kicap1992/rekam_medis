@@ -593,7 +593,7 @@ function DataObatPage(props) {
   }
 
   return (
-    <div>
+    <>
       <BootstrapDialog
         onClose={handleCloseModalEdit}
         aria-labelledby="customized-dialog-title"
@@ -770,7 +770,13 @@ function DataObatPage(props) {
       <Backdrop open={backdrop} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBarAdmin menu="Obat" backdrop={backdrop} sweetalertload={sweetAlertLoading} />
+        <AppBarAdmin menu="Obat" backdrop={backdrop} sweetalertload={sweetAlertLoading} 
+          toRoute={
+            () => {
+              setBackdrop(true);
+            }
+          }
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <Grid container spacing={4}>
@@ -916,7 +922,7 @@ function DataObatPage(props) {
           </Grid>
         </Box>
       </Box>
-    </div>
+    </>
   );
 }
 
